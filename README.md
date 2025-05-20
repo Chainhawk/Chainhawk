@@ -1,4 +1,4 @@
-# hainhawk
+# chainhawk
 
 this is a autonomous blockchain analyzer
 
