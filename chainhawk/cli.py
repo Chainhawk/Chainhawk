@@ -12,7 +12,7 @@ def main(target, rules, debug):
         click.echo(f"[디버그] 대상 파일: {target}")
         click.echo(f"[디버그] 룰셋 경로: {rules}")
     
-    results = run_semgrep(target, rules)
+    results = run_semgrep(target, rules, debug)
     click.echo("[분석 결과]")
     click.echo(results)
 
