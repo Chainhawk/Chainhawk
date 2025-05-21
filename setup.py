@@ -10,6 +10,7 @@ setup(
         'semgrep',
         'click',
         'docker',
+        'tqdm',
     ],
     entry_points={
         'console_scripts': [
