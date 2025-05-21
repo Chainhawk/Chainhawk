@@ -1,0 +1,19 @@
+rules:
+  - id: hardcoded-address
+    message: "하드코딩된 주소가 있습니다. (취약)"
+    metadata:
+      category: security
+      technology:
+        - solidity
+      cwe: "CWE-259: Use of Hard-coded Password or Secret"
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: MEDIUM
+      subcategory:
+        - vuln
+      references:
+        - https://swcregistry.io/docs/SWC-131
+    pattern: |
+      0x$ADDR
+    languages: [solidity]
+    severity: WARNING 

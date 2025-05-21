@@ -1,0 +1,28 @@
+rules:
+  - id: arithmetic-overflow-underflow
+    message: "Solidity 0.8.0 미만에서 산술 오버플로우/언더플로우 취약점 가능성 (취약)"
+    metadata:
+      category: security
+      technology:
+        - solidity
+      cwe: "CWE-190: Integer Overflow or Wraparound"
+      confidence: MEDIUM
+      likelihood: MEDIUM
+      impact: HIGH
+      subcategory:
+        - vuln
+      references:
+        - https://swcregistry.io/docs/SWC-101
+    pattern-either:
+      - pattern: |
+          $X = $Y + $Z;
+      - pattern: |
+          $X = $Y - $Z;
+      - pattern: |
+          $X = $Y * $Z;
+      - pattern: |
+          $X++;
+      - pattern: |
+          $X--;
+    languages: [solidity]
+    severity: WARNING 

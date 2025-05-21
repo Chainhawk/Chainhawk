@@ -1,0 +1,19 @@
+rules:
+  - id: tx-origin-usage
+    message: "tx.origin을 인증에 사용하면 피싱 공격에 취약합니다. (취약)"
+    metadata:
+      category: security
+      technology:
+        - solidity
+      cwe: "CWE-287: Improper Authentication"
+      confidence: HIGH
+      likelihood: HIGH
+      impact: HIGH
+      subcategory:
+        - vuln
+      references:
+        - https://swcregistry.io/docs/SWC-115
+    pattern: |
+      tx.origin
+    languages: [solidity]
+    severity: WARNING 

@@ -1,0 +1,19 @@
+rules:
+  - id: unchecked-call
+    message: "call의 반환값을 체크하지 않음 (취약)"
+    metadata:
+      category: security
+      technology:
+        - solidity
+      cwe: "CWE-252: Unchecked Return Value"
+      confidence: HIGH
+      likelihood: HIGH
+      impact: MEDIUM
+      subcategory:
+        - vuln
+      references:
+        - https://swcregistry.io/docs/SWC-104
+    pattern: |
+      $ADDR.call{...}(...);
+    languages: [solidity]
+    severity: WARNING 

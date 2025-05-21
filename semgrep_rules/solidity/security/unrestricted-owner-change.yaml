@@ -1,0 +1,26 @@
+rules:
+  - id: unrestricted-owner-change
+    message: "오너 변경 함수에 접근제어가 없습니다 (취약)"
+    metadata:
+      category: security
+      technology:
+        - solidity
+      cwe: "CWE-284: Improper Access Control"
+      confidence: HIGH
+      likelihood: HIGH
+      impact: HIGH
+      subcategory:
+        - vuln
+      references:
+        - https://swcregistry.io/docs/SWC-105
+    pattern-either:
+      - pattern: |
+          function $F($A) public {
+            owner = $A;
+          }
+      - pattern: |
+          function $F($A) external {
+            owner = $A;
+          }
+    languages: [solidity]
+    severity: WARNING 
