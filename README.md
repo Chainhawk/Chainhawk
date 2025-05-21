@@ -67,3 +67,4 @@ python -m chainhawk.cli -t Sample/ReentrancyVuln.sol -r semgrep_rules/solidity/s
 
 - Semgrep 공식 문서: https://semgrep.dev/docs/
 - Solidity 보안 가이드: https://docs.soliditylang.org/en/latest/security-considerations.html
+- Semgrep rules : https://github.com/Decurity/semgrep-smart-contracts
