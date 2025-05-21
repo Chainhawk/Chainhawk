@@ -1,0 +1,30 @@
+rules:
+  - id: basic-reentrancy
+    message: >-
+      Potential reentrancy vulnerability detected. The contract modifies state after an external call.
+      Consider following the Checks-Effects-Interactions pattern by moving the state modification before the external call.
+    metadata:
+      category: security
+      technology:
+        - solidity
+      cwe: "CWE-841: Improper Enforcement of Behavioral Workflow"
+      confidence: HIGH
+      likelihood: HIGH
+      impact: HIGH
+      subcategory:
+        - vuln
+      references:
+        - https://swcregistry.io/docs/SWC-107
+        - https://docs.soliditylang.org/en/latest/security-considerations.html#re-entrancy
+    pattern-either:
+      - pattern: |
+          (bool $SENT, ) = $ADDR.call{value: $AMOUNT}("");
+          ...
+          balances[$KEY] -= $AMOUNT;
+      - pattern: |
+          $ADDR.call{value: $AMOUNT}("");
+          ...
+          balances[$KEY] -= $AMOUNT;
+    languages:
+      - solidity
+    severity: ERROR 
