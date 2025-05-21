@@ -1,7 +1,11 @@
+# semgrep_adapter.py
+# Semgrep 도커 이미지 빌드 및 실행 기능 제공
+
 import subprocess
 import json
 import os
 import glob
+from tqdm import tqdm
 from ..config import DOCKER_CONFIG
 
 def build_docker_image():
@@ -31,26 +35,27 @@ def extract_json(text):
         end = text.rfind('}') + 1
         if start >= 0 and end > start:
             json_text = text[start:end]
-            print(f"[디버그] 추출된 JSON 시작: {json_text[:100]}...")
             return json_text
     except Exception as e:
-        print(f"[디버그] JSON 추출 오류: {e}")
+        print(f"[오류] JSON 추출 오류: {e}")
     return text
 
-def run_semgrep(target_path, rules_path='semgrep_rules'):
+def run_semgrep(target_path, rules_path='semgrep_rules', debug=False):
     """
     Semgrep을 도커 컨테이너에서 실행하고 결과를 반환합니다.
     """
     build_docker_image()
     abs_target = os.path.abspath(target_path)
-    print(f"[디버그] 절대 경로: {abs_target}")
+    if debug:
+        print(f"[디버그] 절대 경로: {abs_target}")
     
     # rules_path가 절대경로가 아니면, 현재 작업 디렉터리 기준으로 변환
     if not os.path.isabs(rules_path):
         rules = os.path.abspath(rules_path)
     else:
         rules = rules_path
-    print(f"[디버그] 룰셋 절대 경로: {rules}")
+    if debug:
+        print(f"[디버그] 룰셋 절대 경로: {rules}")
 
     # 룰셋 파일 목록 수집
     rule_files = []
@@ -62,7 +67,8 @@ def run_semgrep(target_path, rules_path='semgrep_rules'):
     if not rule_files:
         return "[오류] 룰셋 파일을 찾을 수 없습니다."
 
-    print(f"[디버그] 발견된 룰셋 파일들: {rule_files}")
+    if debug:
+        print(f"[디버그] 발견된 룰셋 파일들: {rule_files}")
     
     tag = DOCKER_CONFIG['semgrep']['tag']
 
@@ -74,14 +80,16 @@ def run_semgrep(target_path, rules_path='semgrep_rules'):
         'ls', '-la', '/rules'
     ]
     check_result = subprocess.run(check_cmd, capture_output=True, text=True)
-    print("[정보] 룰셋 디렉터리 내용:")
-    print(check_result.stdout)
+    if debug:
+        print("[정보] 룰셋 디렉터리 내용:")
+        print(check_result.stdout)
 
-    # 각 룰셋 파일에 대해 개별적으로 Semgrep 실행
+    # 각 룰셋 파일에 대해 개별적으로 Semgrep 실행 (진행률 표시)
     all_findings = []
-    for rule_file in rule_files:
+    for rule_file in tqdm(rule_files, desc="Semgrep 룰셋 분석 진행", unit="rule"):
         rule_name = os.path.basename(rule_file)
-        print(f"[디버그] {rule_name} 룰셋으로 검사 중...")
+        if debug:
+            print(f"[디버그] {rule_name} 룰셋으로 검사 중...")
         
         # Semgrep 실행
         cmd = [
@@ -94,13 +102,16 @@ def run_semgrep(target_path, rules_path='semgrep_rules'):
             '--json',
             f'/src/{os.path.basename(abs_target)}'
         ]
-        print(f"[디버그] 실행할 명령어: {' '.join(cmd)}")
+        if debug:
+            print(f"[디버그] 실행할 명령어: {' '.join(cmd)}")
         
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
-        print(f"[디버그] 반환 코드: {result.returncode}")
+        if debug:
+            print(f"[디버그] 반환 코드: {result.returncode}")
         
         if result.returncode != 0 and "METRICS:" not in result.stderr:
-            print(f"[경고] {rule_name} 룰셋 실행 실패: {result.stderr}")
+            if debug:
+                print(f"[경고] {rule_name} 룰셋 실행 실패: {result.stderr}")
             continue
         
         try:
@@ -109,7 +120,8 @@ def run_semgrep(target_path, rules_path='semgrep_rules'):
             if findings.get('results'):
                 all_findings.extend(findings['results'])
         except json.JSONDecodeError as e:
-            print(f"[경고] {rule_name} 결과 파싱 실패: {e}")
+            if debug:
+                print(f"[경고] {rule_name} 결과 파싱 실패: {e}")
     
     if all_findings:
         output = "다음과 같은 취약점이 발견되었습니다:\n\n"
