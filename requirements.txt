@@ -1,3 +1,4 @@
 semgrep
 click
-docker 
+docker
+tqdm 
