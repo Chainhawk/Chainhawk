@@ -317,3 +317,10 @@ dist
 .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/python,solidity,rust
+
+.gitmodules
+work_dir
+cache
+.tmp*
+*results*
+test_*
