@@ -8,22 +8,33 @@ def cli():
     pass
 
 @click.command()
-@click.option('--target', '-t', required=True, help='분석할 스마트 컨트랙트 경로')
+@click.option('--foundry-dir', '-f', required=True, help='Foundry 프로젝트 디렉토리 경로')
+@click.option('--contract', '-c', help='배포할 컨트랙트 이름 (선택사항, 자동 감지됨)')
 @click.option('--rules', '-r', default='semgrep_rules', help='Semgrep 룰셋 디렉터리 또는 config')
 @click.option('--engine', '-e', default='semgrep', type=click.Choice(['semgrep', 'ityfuzz']), show_default=True, help='분석 엔진 선택')
 @click.option('--debug', '-d', is_flag=True, help='디버그 모드 활성화')
-def analyze(target, rules, engine, debug):
+def analyze(foundry_dir, contract, rules, engine, debug):
     """스마트 컨트랙트 취약점 분석 실행 (Semgrep/ITYfuzz)"""
     if debug:
         click.echo(f"[디버그] 분석 시작... (엔진: {engine})")
-        click.echo(f"[디버그] 대상 파일: {target}")
+        click.echo(f"[디버그] Foundry 디렉토리: {foundry_dir}")
+        if contract:
+            click.echo(f"[디버그] 대상 컨트랙트: {contract}")
         if engine == 'semgrep':
             click.echo(f"[디버그] 룰셋 경로: {rules}")
 
     if engine == 'semgrep':
-        results = run_semgrep(target, rules, debug)
+        # Semgrep은 개별 파일이 필요하므로 첫 번째 .sol 파일 사용
+        from pathlib import Path
+        foundry_path = Path(foundry_dir)
+        sol_files = list((foundry_path / "src").glob("*.sol"))
+        if sol_files:
+            target_file = str(sol_files[0])
+            results = run_semgrep(target_file, rules, debug)
+        else:
+            results = "[오류] src 디렉토리에 .sol 파일이 없습니다."
     elif engine == 'ityfuzz':
-        results = run_ityfuzz(target, debug)
+        results = run_ityfuzz(foundry_dir, contract, debug)
     else:
         results = '[오류] 지원하지 않는 분석 엔진입니다.'
     
@@ -78,7 +89,7 @@ def validate():
     
     click.echo("\n💡 ITYfuzz 사용 시 필요한 것들:")
     click.echo("  - Docker 이미지 빌드: docker build -f docker/ityfuzz.Dockerfile -t chainhawk-ityfuzz .")
-    click.echo("  - Foundry 설치: curl -L https://foundry.paradigm.xyz | bash")
+    click.echo("  - Foundry 설치: https://getfoundry.sh")
 
 @click.command()
 def info():
