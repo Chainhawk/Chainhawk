@@ -9,9 +9,9 @@ contract ReentrancyVuln {
     }
 
     function withdraw(uint _amount) public {
-        require(balances[msg.sender] >= _amount, "잔액 부족");
+        require(balances[msg.sender] >= _amount, "balances lack");
         (bool sent, ) = msg.sender.call{value: _amount}("");
-        require(sent, "전송 실패");
+        require(sent, "transfer fail");
         balances[msg.sender] -= _amount;
     }
 } 

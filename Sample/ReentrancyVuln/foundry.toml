@@ -1,0 +1,10 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.30"
+
+[profile.fuzz]
+runs = 1000
+max_test_rejects = 65536
+seed = '0x1'
